@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
-import { usePagination } from '../../hooks/common/usePagination';
-import { useEditablePosts } from '../../hooks/useEditablePosts';
-import { paginateData } from '../../utils/paginateData';
-import { ITEMS_PER_PAGE } from '../../constants';
-import Buttonxlsx from '../Buttonxlsx';
-import { MdEdit, MdDone } from 'react-icons/md';
+import { useEffect, useMemo, useState } from "react";
+import { usePagination } from "../../hooks/common/usePagination";
+import { useEditablePosts } from "../../hooks/useEditablePosts";
+import { paginateData } from "../../utils/paginateData";
+import { ITEMS_PER_PAGE } from "../../constants";
+import Buttonxlsx from "../Buttonxlsx";
+import { MdEdit, MdDone } from "react-icons/md";
 
 export type Post = {
   id: number;
@@ -13,8 +13,12 @@ export type Post = {
 };
 
 export default function SearchTable() {
-  const { allData: completeData, loading } = usePagination<Post>('/posts', 1, ITEMS_PER_PAGE);
-  const [searchTerm, setSearchTerm] = useState('');
+  const { allData: completeData, loading } = usePagination<Post>(
+    "/posts",
+    1,
+    ITEMS_PER_PAGE
+  );
+  const [searchTerm, setSearchTerm] = useState("");
   const [localPage, setLocalPage] = useState(1);
 
   const {
@@ -33,7 +37,7 @@ export default function SearchTable() {
     }
   }, [completeData]);
 
-  const isFiltering = searchTerm.trim() !== '';
+  const isFiltering = searchTerm.trim() !== "";
 
   const filteredData = useMemo(() => {
     return localCompleteData.filter((post) =>
@@ -46,14 +50,22 @@ export default function SearchTable() {
     return paginateData(base, localPage, ITEMS_PER_PAGE);
   }, [filteredData, localCompleteData, isFiltering, localPage]);
 
-  const totalPages = Math.ceil((isFiltering ? filteredData.length : localCompleteData.length) / ITEMS_PER_PAGE);
-  const totalPagesFormated = Array.from({ length: totalPages }, (_, i) => i + 1);
+  const totalPages = Math.ceil(
+    (isFiltering ? filteredData.length : localCompleteData.length) /
+      ITEMS_PER_PAGE
+  );
+  const totalPagesFormated = Array.from(
+    { length: totalPages },
+    (_, i) => i + 1
+  );
 
   return (
     <div className="relative flex flex-col w-full h-full text-gray-700 bg-white shadow-md rounded-xl bg-clip-border p-4">
       <div className="flex flex-col justify-between gap-4 mb-4 md:flex-row md:items-center">
         <div>
-          <h5 className="text-xl font-semibold text-blue-gray-900">Tabela Interativa</h5>
+          <h5 className="text-xl font-semibold text-blue-gray-900">
+            Tabela Interativa
+          </h5>
           <p className="text-base font-normal text-gray-700">Teste técnico</p>
         </div>
         <div className="flex items-center gap-2">
@@ -85,13 +97,19 @@ export default function SearchTable() {
               </svg>
             </div>
           </div>
-          <Buttonxlsx currentPageData={paginatedData} allData={localCompleteData} />
+          <Buttonxlsx
+            currentPageData={paginatedData}
+            allData={localCompleteData}
+          />
         </div>
       </div>
 
       <div className="overflow-x-auto">
         {loading ? (
-          <p className="text-center">Carregando...</p>
+          <div className="flex justify-center items-center py-10">
+            <div className="w-6 h-6 border-4 border-gray-300 border-t-gray-800 rounded-full animate-spin" />
+            <span className="ml-3 text-gray-600 text-sm">Carregando...</span>
+          </div>
         ) : (
           <table className="min-w-full text-left table-auto border-collapse">
             <thead>
@@ -116,7 +134,10 @@ export default function SearchTable() {
                           className="w-full border px-2 py-1 text-sm rounded"
                           value={editValues.title}
                           onChange={(e) =>
-                            setEditValues((prev) => ({ ...prev, title: e.target.value }))
+                            setEditValues((prev) => ({
+                              ...prev,
+                              title: e.target.value,
+                            }))
                           }
                         />
                       ) : (
@@ -130,7 +151,10 @@ export default function SearchTable() {
                           rows={3}
                           value={editValues.body}
                           onChange={(e) =>
-                            setEditValues((prev) => ({ ...prev, body: e.target.value }))
+                            setEditValues((prev) => ({
+                              ...prev,
+                              body: e.target.value,
+                            }))
                           }
                         />
                       ) : (
@@ -142,7 +166,9 @@ export default function SearchTable() {
                         className="h-8 w-8 flex items-center justify-center bg-gray-900 text-white rounded-full hover:bg-gray-700 cursor-pointer"
                         type="button"
                         onClick={() =>
-                          isEditing ? finishEditing(post.id) : startEditing(post)
+                          isEditing
+                            ? finishEditing(post.id)
+                            : startEditing(post)
                         }
                       >
                         {isEditing ? <MdDone /> : <MdEdit />}
@@ -179,8 +205,8 @@ export default function SearchTable() {
               onClick={() => setLocalPage(pageNumber)}
               className={`px-2 py-1 mb-1 md:mb-0 text-sm border rounded-md ${
                 localPage === pageNumber
-                  ? 'bg-gray-800 text-white'
-                  : 'text-gray-700 hover:bg-gray-200'
+                  ? "bg-gray-800 text-white"
+                  : "text-gray-700 hover:bg-gray-200"
               }`}
             >
               {pageNumber}

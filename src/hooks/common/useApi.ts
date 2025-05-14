@@ -7,6 +7,10 @@ type ApiResponse<T> = {
   loading: boolean;
 };
 
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export function useApi<T>(endpoint: string): ApiResponse<T> {
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -15,6 +19,7 @@ export function useApi<T>(endpoint: string): ApiResponse<T> {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        await sleep(1000);
         const response = await api.get<T>(endpoint);
         setData(response.data);
       } catch (err) {
