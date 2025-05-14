@@ -25,6 +25,11 @@ export function useEditablePosts(initialData: Post[]) {
     setEditValues({ title: "", body: "" });
   };
 
+  const cancelEditing = () => {
+  setEditingId(null);
+  setEditValues({ title: "", body: "" });
+};
+
   return {
     data,
     setData,
@@ -33,5 +38,6 @@ export function useEditablePosts(initialData: Post[]) {
     setEditValues,
     startEditing,
     finishEditing,
+    cancelEditing
   };
 }

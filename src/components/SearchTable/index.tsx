@@ -4,7 +4,7 @@ import { useEditablePosts } from "../../hooks/useEditablePosts";
 import { paginateData } from "../../utils/paginateData";
 import { ITEMS_PER_PAGE } from "../../constants";
 import Buttonxlsx from "../Buttonxlsx";
-import { MdEdit, MdDone } from "react-icons/md";
+import { MdEdit, MdDone, MdClose } from "react-icons/md";
 import { toast } from "react-toastify";
 
 export type Post = {
@@ -37,6 +37,7 @@ export default function SearchTable() {
     setEditValues,
     startEditing,
     finishEditing,
+    cancelEditing
   } = useEditablePosts(completeData || []);
 
   useEffect(() => {
@@ -62,18 +63,14 @@ export default function SearchTable() {
     (isFiltering ? filteredData.length : localCompleteData.length) /
       ITEMS_PER_PAGE
   );
-  const totalPagesFormated = Array.from(
-    { length: totalPages },
-    (_, i) => i + 1
-  );
+  const totalPagesFormated = Array.from({ length: totalPages }, (_, i) => i + 1);
+
 
   return (
     <div className="relative flex flex-col w-full h-full text-gray-700 bg-white shadow-md rounded-xl bg-clip-border p-4">
       <div className="flex flex-col justify-between gap-4 mb-4 md:flex-row md:items-center">
         <div>
-          <h5 className="text-xl font-semibold text-blue-gray-900">
-            Tabela Interativa
-          </h5>
+          <h5 className="text-xl font-semibold text-blue-gray-900">Tabela Interativa</h5>
           <p className="text-base font-normal text-gray-700">Teste técnico</p>
         </div>
         <div className="flex items-center gap-2">
@@ -88,27 +85,8 @@ export default function SearchTable() {
               }}
               className="w-full rounded-md border border-gray-300 py-2 px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400"
             />
-            <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-                className="w-5 h-5 text-gray-500"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-                />
-              </svg>
-            </div>
           </div>
-          <Buttonxlsx
-            currentPageData={paginatedData}
-            allData={localCompleteData}
-          />
+          <Buttonxlsx currentPageData={paginatedData} allData={localCompleteData} />
         </div>
       </div>
 
@@ -140,17 +118,12 @@ export default function SearchTable() {
                         <input
                           type="text"
                           className={`w-full border px-2 py-1 text-sm rounded ${
-                            fieldErrors.title
-                              ? "border-red-500"
-                              : "border-gray-300"
+                            fieldErrors.title ? "border-red-500" : "border-gray-300"
                           }`}
                           value={editValues.title}
                           maxLength={100}
                           onChange={(e) =>
-                            setEditValues((prev) => ({
-                              ...prev,
-                              title: e.target.value,
-                            }))
+                            setEditValues((prev) => ({ ...prev, title: e.target.value }))
                           }
                         />
                       ) : (
@@ -161,18 +134,13 @@ export default function SearchTable() {
                       {isEditing ? (
                         <textarea
                           className={`w-full border px-2 py-1 text-sm rounded resize-none ${
-                            fieldErrors.body
-                              ? "border-red-500"
-                              : "border-gray-300"
+                            fieldErrors.body ? "border-red-500" : "border-gray-300"
                           }`}
                           rows={3}
                           maxLength={255}
                           value={editValues.body}
                           onChange={(e) =>
-                            setEditValues((prev) => ({
-                              ...prev,
-                              body: e.target.value,
-                            }))
+                            setEditValues((prev) => ({ ...prev, body: e.target.value }))
                           }
                         />
                       ) : (
@@ -180,34 +148,50 @@ export default function SearchTable() {
                       )}
                     </td>
                     <td className="p-2 sm:p-4 border-b">
-                      <button
-                        className="h-8 w-8 flex items-center justify-center bg-gray-900 text-white rounded-full hover:bg-gray-700 cursor-pointer"
-                        type="button"
-                        onClick={() => {
-                          if (isEditing) {
-                            const trimmedTitle = editValues.title?.trim() ?? "";
-                            const trimmedBody = editValues.body?.trim() ?? "";
-                            const errors = {
-                              title: !trimmedTitle,
-                              body: !trimmedBody,
-                            };
+                      {isEditing ? (
+                        <div className="flex gap-2">
+                          <button
+                            className="h-8 w-8 flex items-center justify-center bg-green-600 text-white rounded-full hover:bg-green-500"
+                            type="button"
+                            onClick={() => {
+                              const trimmedTitle = editValues.title?.trim() ?? "";
+                              const trimmedBody = editValues.body?.trim() ?? "";
+                              const errors = {
+                                title: !trimmedTitle,
+                                body: !trimmedBody,
+                              };
 
-                            setFieldErrors(errors);
+                              setFieldErrors(errors);
 
-                            if (errors.title || errors.body) {
-                              toast.error(
-                                "Os campos título e post não podem estar vazios."
-                              );
-                              return;
-                            }
-                            finishEditing(post.id);
-                          } else {
-                            startEditing(post);
-                          }
-                        }}
-                      >
-                        {isEditing ? <MdDone /> : <MdEdit />}
-                      </button>
+                              if (errors.title || errors.body) {
+                                toast.error("Os campos título e post não podem estar vazios.");
+                                return;
+                              }
+
+                              setFieldErrors({ title: false, body: false });
+                              finishEditing(post.id);
+                            }}
+                          >
+                            <MdDone />
+                          </button>
+
+                          <button
+                            className="h-8 w-8 flex items-center justify-center bg-red-600 text-white rounded-full hover:bg-red-500"
+                            type="button"
+                            onClick={cancelEditing}
+                          >
+                            <MdClose />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          className="h-8 w-8 flex items-center justify-center bg-gray-900 text-white rounded-full hover:bg-gray-700"
+                          type="button"
+                          onClick={() => startEditing(post)}
+                        >
+                          <MdEdit />
+                        </button>
+                      )}
                     </td>
                   </tr>
                 );
