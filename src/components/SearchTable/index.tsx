@@ -133,6 +133,7 @@ export default function SearchTable() {
                           type="text"
                           className="w-full border px-2 py-1 text-sm rounded"
                           value={editValues.title}
+                          maxLength={100}
                           onChange={(e) =>
                             setEditValues((prev) => ({
                               ...prev,
@@ -149,6 +150,7 @@ export default function SearchTable() {
                         <textarea
                           className="w-full border px-2 py-1 text-sm rounded resize-none"
                           rows={3}
+                          maxLength={255}
                           value={editValues.body}
                           onChange={(e) =>
                             setEditValues((prev) => ({
@@ -191,7 +193,7 @@ export default function SearchTable() {
 
       <div className="flex flex-wrap items-center justify-between p-2 mt-4">
         <button
-          className="px-3 py-1 mb-2 md:mb-0 text-sm font-medium text-gray-700 border rounded-md hover:bg-gray-200"
+          className="px-3 py-1 mb-2 md:mb-0 text-sm font-medium text-gray-700 border rounded-md hover:bg-gray-200 cursor-pointer"
           onClick={() => setLocalPage((prev) => Math.max(prev - 1, 1))}
           disabled={localPage === 1}
         >
@@ -203,7 +205,7 @@ export default function SearchTable() {
             <button
               key={pageNumber}
               onClick={() => setLocalPage(pageNumber)}
-              className={`px-2 py-1 mb-1 md:mb-0 text-sm border rounded-md ${
+              className={`px-2 py-1 mb-1 md:mb-0 text-sm border rounded-md cursor-pointer ${
                 localPage === pageNumber
                   ? "bg-gray-800 text-white"
                   : "text-gray-700 hover:bg-gray-200"
@@ -215,7 +217,7 @@ export default function SearchTable() {
         </div>
 
         <button
-          className="px-3 py-1 mb-2 md:mb-0 text-sm font-medium text-gray-700 border rounded-md hover:bg-gray-200"
+          className="px-3 py-1 mb-2 md:mb-0 text-sm font-medium text-gray-700 border rounded-md hover:bg-gray-200 cursor-pointer"
           onClick={() => setLocalPage((prev) => Math.min(prev + 1, totalPages))}
           disabled={localPage === totalPages}
         >

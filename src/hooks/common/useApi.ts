@@ -19,7 +19,7 @@ export function useApi<T>(endpoint: string): ApiResponse<T> {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        await sleep(1000);
+        await sleep(500);
         const response = await api.get<T>(endpoint);
         setData(response.data);
       } catch (err) {
