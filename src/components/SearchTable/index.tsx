@@ -1,3 +1,4 @@
+import { useState, useMemo } from "react";
 import { usePagination } from "../../hooks/common/usePagination";
 import Buttonxlsx from "../Buttonxlsx";
 
@@ -6,6 +7,8 @@ export type Post = {
   title: string;
   body: string;
 };
+
+const ITEMS_PER_PAGE = 15;
 
 export default function SearchTable() {
   const {
@@ -17,11 +20,34 @@ export default function SearchTable() {
     prevPage,
     goToPage,
     allData: completeData,
-  } = usePagination<Post>("/posts", 1, 15);
+  } = usePagination<Post>("/posts", 1, ITEMS_PER_PAGE);
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [localPage, setLocalPage] = useState(1);
+
+  const isFiltering = searchTerm.trim() !== "" && completeData?.length;
+
+  const filteredData = useMemo(() => {
+    if (!isFiltering) return [];
+    return completeData.filter((post) =>
+      post.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [searchTerm, completeData]);
+
+  const paginatedFilteredData = useMemo(() => {
+    if (!isFiltering) return [];
+    const start = (localPage - 1) * ITEMS_PER_PAGE;
+    return filteredData.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredData, localPage]);
+
+  const totalFilteredPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+
   const totalPagesFormated = Array.from(
-    { length: totalPages },
+    { length: isFiltering ? totalFilteredPages : totalPages },
     (_, index) => index + 1
   );
+
+  const displayData = isFiltering ? paginatedFilteredData : posts;
 
   return (
     <div className="relative flex flex-col w-full h-full text-gray-700 bg-white shadow-md rounded-xl bg-clip-border p-4">
@@ -35,6 +61,11 @@ export default function SearchTable() {
             <input
               type="text"
               placeholder="Pesquisar..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setLocalPage(1); // reseta para a página 1 sempre que digitar
+              }}
               className="w-full rounded-md border border-gray-300 py-2 px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400"
             />
             <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
@@ -54,12 +85,12 @@ export default function SearchTable() {
               </svg>
             </div>
           </div>
-          <Buttonxlsx currentPageData={posts} allData={completeData} />
+          <Buttonxlsx currentPageData={displayData} allData={completeData} />
         </div>
       </div>
 
       <div className="overflow-x-auto">
-        {loading ? (
+        {loading && !isFiltering ? (
           <p className="text-center">Carregando...</p>
         ) : (
           <table className="min-w-full text-left table-auto border-collapse">
@@ -72,7 +103,7 @@ export default function SearchTable() {
               </tr>
             </thead>
             <tbody>
-              {posts.map((post) => (
+              {displayData.map((post) => (
                 <tr key={post.id} className="odd:bg-white even:bg-gray-50">
                   <td className="p-2 sm:p-4 border-b">{post.id}</td>
                   <td className="p-2 sm:p-4 border-b">{post.title}</td>
@@ -89,6 +120,13 @@ export default function SearchTable() {
                   </td>
                 </tr>
               ))}
+              {displayData.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="p-4 text-center text-gray-500">
+                    Nenhum resultado encontrado.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         )}
@@ -98,7 +136,8 @@ export default function SearchTable() {
         <button
           className="px-3 py-1 mb-2 md:mb-0 text-sm font-medium text-gray-700 border rounded-md hover:bg-gray-200"
           type="button"
-          onClick={prevPage}
+          onClick={() => (isFiltering ? setLocalPage((prev) => Math.max(prev - 1, 1)) : prevPage())}
+          disabled={isFiltering ? localPage === 1 : false}
         >
           Anterior
         </button>
@@ -107,9 +146,11 @@ export default function SearchTable() {
           {totalPagesFormated.map((pageNumber) => (
             <button
               key={pageNumber}
-              onClick={() => goToPage(pageNumber)}
+              onClick={() => (isFiltering ? setLocalPage(pageNumber) : goToPage(pageNumber))}
               className={`px-2 py-1 mb-1 md:mb-0 text-sm border rounded-md ${
-                page === pageNumber ? "bg-gray-800 text-white" : "text-gray-700 hover:bg-gray-200"
+                (isFiltering ? localPage : page) === pageNumber
+                  ? "bg-gray-800 text-white"
+                  : "text-gray-700 hover:bg-gray-200"
               }`}
             >
               {pageNumber}
@@ -120,7 +161,12 @@ export default function SearchTable() {
         <button
           className="px-3 py-1 mb-2 md:mb-0 text-sm font-medium text-gray-700 border rounded-md hover:bg-gray-200"
           type="button"
-          onClick={nextPage}
+          onClick={() =>
+            isFiltering
+              ? setLocalPage((prev) => Math.min(prev + 1, totalFilteredPages))
+              : nextPage()
+          }
+          disabled={isFiltering ? localPage === totalFilteredPages : false}
         >
           Próximo
         </button>
