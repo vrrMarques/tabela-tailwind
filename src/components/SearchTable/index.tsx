@@ -167,11 +167,22 @@ export default function SearchTable() {
                       <button
                         className="h-8 w-8 flex items-center justify-center bg-gray-900 text-white rounded-full hover:bg-gray-700 cursor-pointer"
                         type="button"
-                        onClick={() =>
-                          isEditing
-                            ? finishEditing(post.id)
-                            : startEditing(post)
-                        }
+                        onClick={() => {
+                          if (isEditing) {
+                            if (
+                              !editValues.title.trim() ||
+                              !editValues.body.trim()
+                            ) {
+                              alert(
+                                "Os campos título e post não podem estar vazios."
+                              );
+                              return;
+                            }
+                            finishEditing(post.id);
+                          } else {
+                            startEditing(post);
+                          }
+                        }}
                       >
                         {isEditing ? <MdDone /> : <MdEdit />}
                       </button>
