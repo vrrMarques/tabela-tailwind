@@ -151,7 +151,7 @@ export default function SearchTable() {
                       {isEditing ? (
                         <div className="flex gap-2">
                           <button
-                            className="h-8 w-8 flex items-center justify-center bg-green-600 text-white rounded-full hover:bg-green-500"
+                            className="h-8 w-8 flex items-center justify-center bg-green-600 text-white rounded-full hover:bg-green-500 cursor-pointer"
                             type="button"
                             onClick={() => {
                               const trimmedTitle = editValues.title?.trim() ?? "";
@@ -164,7 +164,7 @@ export default function SearchTable() {
                               setFieldErrors(errors);
 
                               if (errors.title || errors.body) {
-                                toast.error("Os campos título e post não podem estar vazios.");
+                                toast.error("Por favor, preencha todos os campos");
                                 return;
                               }
 
@@ -176,7 +176,7 @@ export default function SearchTable() {
                           </button>
 
                           <button
-                            className="h-8 w-8 flex items-center justify-center bg-red-600 text-white rounded-full hover:bg-red-500"
+                            className="h-8 w-8 flex items-center justify-center bg-red-600 text-white rounded-full hover:bg-red-500 cursor-pointer"
                             type="button"
                             onClick={cancelEditing}
                           >
@@ -185,7 +185,7 @@ export default function SearchTable() {
                         </div>
                       ) : (
                         <button
-                          className="h-8 w-8 flex items-center justify-center bg-gray-900 text-white rounded-full hover:bg-gray-700"
+                          className="h-8 w-8 flex items-center justify-center bg-gray-900 text-white rounded-full hover:bg-gray-700 cursor-pointer"
                           type="button"
                           onClick={() => startEditing(post)}
                         >
