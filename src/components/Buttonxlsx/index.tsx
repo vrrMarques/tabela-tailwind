@@ -1,12 +1,11 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import * as XLSX from 'xlsx';
 import type { Post } from '../SearchTable';
 import { PiMicrosoftExcelLogoFill } from "react-icons/pi";
 
 type DownloadButtonProps = {
-  currentPageData: any[];
+  currentPageData: Post[];
   allData: Post[] | null;
 };
 
@@ -16,7 +15,7 @@ export default function Buttonxlsx({ currentPageData, allData }: DownloadButtonP
   const buttonRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const handleDownload = (data: any[], filename: string) => {
+  const handleDownload = (data: Post[], filename: string) => {
     const validData = data ?? [];
     const worksheet = XLSX.utils.json_to_sheet(validData);
     const workbook = XLSX.utils.book_new();

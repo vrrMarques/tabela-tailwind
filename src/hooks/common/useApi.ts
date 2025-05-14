@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect } from 'react';
-import api from '../../api/axiosConfig';
+import { useState, useEffect } from "react";
+import api from "../../api/axiosConfig";
 
 type ApiResponse<T> = {
   data: T | null;
@@ -18,8 +17,12 @@ export function useApi<T>(endpoint: string): ApiResponse<T> {
       try {
         const response = await api.get<T>(endpoint);
         setData(response.data);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("Erro inesperado");
+        }
       } finally {
         setLoading(false);
       }
