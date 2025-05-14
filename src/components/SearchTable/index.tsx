@@ -1,7 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
-import { usePagination } from "../../hooks/common/usePagination";
-import Buttonxlsx from "../Buttonxlsx";
-import { MdEdit, MdDone } from "react-icons/md";
+import { useEffect, useMemo, useState } from 'react';
+import { usePagination } from '../../hooks/common/usePagination';
+import { useEditablePosts } from '../../hooks/useEditablePosts';
+import { paginateData } from '../../utils/paginateData';
+import { ITEMS_PER_PAGE } from '../../constants';
+import Buttonxlsx from '../Buttonxlsx';
+import { MdEdit, MdDone } from 'react-icons/md';
 
 export type Post = {
   id: number;
@@ -9,22 +12,20 @@ export type Post = {
   body: string;
 };
 
-const ITEMS_PER_PAGE = 15;
-
 export default function SearchTable() {
-  const {
-    allData: completeData,
-    loading,
-  } = usePagination<Post>("/posts", 1, ITEMS_PER_PAGE);
-
-  const [localCompleteData, setLocalCompleteData] = useState<Post[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
+  const { allData: completeData, loading } = usePagination<Post>('/posts', 1, ITEMS_PER_PAGE);
+  const [searchTerm, setSearchTerm] = useState('');
   const [localPage, setLocalPage] = useState(1);
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [editValues, setEditValues] = useState<{ title: string; body: string }>({
-    title: "",
-    body: "",
-  });
+
+  const {
+    data: localCompleteData,
+    setData: setLocalCompleteData,
+    editingId,
+    editValues,
+    setEditValues,
+    startEditing,
+    finishEditing,
+  } = useEditablePosts(completeData || []);
 
   useEffect(() => {
     if (completeData?.length) {
@@ -32,7 +33,7 @@ export default function SearchTable() {
     }
   }, [completeData]);
 
-  const isFiltering = searchTerm.trim() !== "";
+  const isFiltering = searchTerm.trim() !== '';
 
   const filteredData = useMemo(() => {
     return localCompleteData.filter((post) =>
@@ -41,9 +42,8 @@ export default function SearchTable() {
   }, [searchTerm, localCompleteData]);
 
   const paginatedData = useMemo(() => {
-    const data = isFiltering ? filteredData : localCompleteData;
-    const start = (localPage - 1) * ITEMS_PER_PAGE;
-    return data.slice(start, start + ITEMS_PER_PAGE);
+    const base = isFiltering ? filteredData : localCompleteData;
+    return paginateData(base, localPage, ITEMS_PER_PAGE);
   }, [filteredData, localCompleteData, isFiltering, localPage]);
 
   const totalPages = Math.ceil((isFiltering ? filteredData.length : localCompleteData.length) / ITEMS_PER_PAGE);
@@ -109,7 +109,6 @@ export default function SearchTable() {
                 return (
                   <tr key={post.id} className="odd:bg-white even:bg-gray-50">
                     <td className="p-2 sm:p-4 border-b">{post.id}</td>
-
                     <td className="p-2 sm:p-4 border-b">
                       {isEditing ? (
                         <input
@@ -124,7 +123,6 @@ export default function SearchTable() {
                         post.title
                       )}
                     </td>
-
                     <td className="p-2 sm:p-4 border-b max-w-[350px] break-words whitespace-normal">
                       {isEditing ? (
                         <textarea
@@ -139,28 +137,15 @@ export default function SearchTable() {
                         <span className="block break-words">{post.body}</span>
                       )}
                     </td>
-
                     <td className="p-2 sm:p-4 border-b">
                       <button
                         className="h-8 w-8 flex items-center justify-center bg-gray-900 text-white rounded-full hover:bg-gray-700 cursor-pointer"
                         type="button"
-                        onClick={() => {
-                          if (isEditing) {
-                            const updated = localCompleteData.map((p) =>
-                              p.id === post.id
-                                ? { ...p, title: editValues.title, body: editValues.body }
-                                : p
-                            );
-                            setLocalCompleteData(updated);
-                            setEditingId(null);
-                            setEditValues({ title: "", body: "" });
-                          } else {
-                            setEditingId(post.id);
-                            setEditValues({ title: post.title, body: post.body });
-                          }
-                        }}
+                        onClick={() =>
+                          isEditing ? finishEditing(post.id) : startEditing(post)
+                        }
                       >
-                        {isEditing ? <MdDone/> : <MdEdit /> }
+                        {isEditing ? <MdDone /> : <MdEdit />}
                       </button>
                     </td>
                   </tr>
@@ -194,8 +179,8 @@ export default function SearchTable() {
               onClick={() => setLocalPage(pageNumber)}
               className={`px-2 py-1 mb-1 md:mb-0 text-sm border rounded-md ${
                 localPage === pageNumber
-                  ? "bg-gray-800 text-white"
-                  : "text-gray-700 hover:bg-gray-200"
+                  ? 'bg-gray-800 text-white'
+                  : 'text-gray-700 hover:bg-gray-200'
               }`}
             >
               {pageNumber}
