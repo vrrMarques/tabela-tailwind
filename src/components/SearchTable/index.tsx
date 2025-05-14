@@ -5,6 +5,7 @@ import { paginateData } from "../../utils/paginateData";
 import { ITEMS_PER_PAGE } from "../../constants";
 import Buttonxlsx from "../Buttonxlsx";
 import { MdEdit, MdDone } from "react-icons/md";
+import { toast } from "react-toastify";
 
 export type Post = {
   id: number;
@@ -20,6 +21,13 @@ export default function SearchTable() {
   );
   const [searchTerm, setSearchTerm] = useState("");
   const [localPage, setLocalPage] = useState(1);
+  const [fieldErrors, setFieldErrors] = useState<{
+    title: boolean;
+    body: boolean;
+  }>({
+    title: false,
+    body: false,
+  });
 
   const {
     data: localCompleteData,
@@ -131,7 +139,11 @@ export default function SearchTable() {
                       {isEditing ? (
                         <input
                           type="text"
-                          className="w-full border px-2 py-1 text-sm rounded"
+                          className={`w-full border px-2 py-1 text-sm rounded ${
+                            fieldErrors.title
+                              ? "border-red-500"
+                              : "border-gray-300"
+                          }`}
                           value={editValues.title}
                           maxLength={100}
                           onChange={(e) =>
@@ -148,7 +160,11 @@ export default function SearchTable() {
                     <td className="p-2 sm:p-4 border-b max-w-[350px] break-words whitespace-normal">
                       {isEditing ? (
                         <textarea
-                          className="w-full border px-2 py-1 text-sm rounded resize-none"
+                          className={`w-full border px-2 py-1 text-sm rounded resize-none ${
+                            fieldErrors.body
+                              ? "border-red-500"
+                              : "border-gray-300"
+                          }`}
                           rows={3}
                           maxLength={255}
                           value={editValues.body}
@@ -169,11 +185,17 @@ export default function SearchTable() {
                         type="button"
                         onClick={() => {
                           if (isEditing) {
-                            if (
-                              !editValues.title.trim() ||
-                              !editValues.body.trim()
-                            ) {
-                              alert(
+                            const trimmedTitle = editValues.title?.trim() ?? "";
+                            const trimmedBody = editValues.body?.trim() ?? "";
+                            const errors = {
+                              title: !trimmedTitle,
+                              body: !trimmedBody,
+                            };
+
+                            setFieldErrors(errors);
+
+                            if (errors.title || errors.body) {
+                              toast.error(
                                 "Os campos título e post não podem estar vazios."
                               );
                               return;
